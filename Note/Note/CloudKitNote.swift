@@ -53,7 +53,7 @@ public class CloudKitNote : CloudKitNoteDatabaseDelegate {
 		// into a String here.
 		let modified = record["modified"] as? Date
 		do {
-			let text = try String(contentsOf: textAsset!.fileURL)
+            let text = try String(contentsOf: textAsset!.fileURL!)
 			return (text, modified, nil)
 		}
 		catch {
@@ -109,7 +109,7 @@ public class CloudKitNote : CloudKitNoteDatabaseDelegate {
 					}
 					// No record up on iCloud, so we’ll start with a
 					// brand new record.
-					let recordID = CKRecordID(recordName: self.recordName, zoneID: noteDB.zoneID!)
+                    let recordID = CKRecord.ID(recordName: self.recordName, zoneID: noteDB.zoneID!)
 					self.noteRecord = CKRecord(recordType: "note", recordID: recordID)
 					self.noteRecord?["version"] = NSNumber(value:self.version)
 				}

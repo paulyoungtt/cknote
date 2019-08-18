@@ -20,7 +20,7 @@ public class CloudKitNoteDatabase {
 	}
 	
 	public var delegate: CloudKitNoteDatabaseDelegate?
-	public var zoneID: CKRecordZoneID?
+    public var zoneID: CKRecordZone.ID?
 	
 	// Create a custom zone to contain our note records. We only have to do this once.
 	private func createZone(completion: @escaping (Error?) -> Void) {
@@ -55,15 +55,17 @@ public class CloudKitNoteDatabase {
 		// records you can specify a more interesting NSPredicate here.
 		// For our purposes we’ll be notified of all changes.
 		let predicate = NSPredicate(value: true)
-		let subscription = CKQuerySubscription(recordType: "note",
-		                                       predicate: predicate,
-		                                       subscriptionID: subscriptionID,
-		                                       options: [.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate])
+        let subscription = CKQuerySubscription(
+            recordType: "note",
+            predicate: predicate,
+            subscriptionID: subscriptionID,
+            options: [CKQuerySubscription.Options.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate]
+        )
 		
 		// We set shouldSendContentAvailable to true to indicate we want CloudKit
 		// to use silent pushes, which won’t bother the user (and which don’t require
 		// user permission.)
-		let notificationInfo = CKNotificationInfo()
+        let notificationInfo = CKSubscription.NotificationInfo()
 		notificationInfo.shouldSendContentAvailable = true
 		subscription.notificationInfo = notificationInfo
 		
@@ -84,7 +86,7 @@ public class CloudKitNoteDatabase {
 
 	// Fetch a record from the iCloud database
 	public func loadRecord(name: String, completion: @escaping (CKRecord?, Error?) -> Void) {
-		let recordID = CKRecordID(recordName: name, zoneID: self.zoneID!)
+        let recordID = CKRecord.ID(recordName: name, zoneID: self.zoneID!)
 		let operation = CKFetchRecordsOperation(recordIDs: [recordID])
 		operation.fetchRecordsCompletionBlock = { records, error in
 			guard error == nil else {
@@ -154,7 +156,7 @@ public class CloudKitNoteDatabase {
 		if changeTokenData != nil {
 			changeToken = NSKeyedUnarchiver.unarchiveObject(with: changeTokenData!) as! CKServerChangeToken?
 		}
-		let options = CKFetchRecordZoneChangesOptions()
+        let options = CKFetchRecordZoneChangesOperation.ZoneOptions()
 		options.previousServerChangeToken = changeToken
 		let optionsMap = [zoneID!: options]
 		let operation = CKFetchRecordZoneChangesOperation(recordZoneIDs: [zoneID!], optionsByRecordZoneID: optionsMap)
